@@ -1,0 +1,103 @@
+
+
+db.categories.insert( { _id: "MongoDB", children: [] } )
+db.categories.insert( { _id: "dbm", children: [] } )
+db.categories.insert( { _id: "Databases", children: [ "MongoDB", "dbm" ] } )
+db.categories.insert( { _id: "Languages", children: [] } )
+db.categories.insert( { _id: "Programming", children: [ "Languages", "Databases" ] } )
+db.categories.insert( { _id: "Books", children: [ "Programming" ] } )
+
+
+
+var parentID=db.categories.findOne({_id: "MongoDB"}).parent;
+var output=[];
+var level=1;
+while(parentID){
+    parent=db.categories.findOne({_id: parentID});
+    outputs={Name:parent._id,level:level};
+    output.push(outputs);
+    level=level+1;
+    parentID=parent.parent;
+}
+output
+
+
+
+function treeHeight(nodeId){
+	var ht=0;
+	var children=db.categories.find({parent : nodeId});
+	while(children.hasNext() === true){
+		var child=children.next();
+		child_ht=treeHeight(child._id);
+		if(child_ht > ht){
+			ht=child_ht;
+		}
+	}
+	return ht + 1;
+}
+
+
+var rootN="Books";
+print(treeHeight(rootN));
+
+
+
+
+db.categories.insert( { _id: "MongoDB", children: [] } )
+db.categories.insert( { _id: "dbm", children: [] } )
+db.categories.insert( { _id: "Databases", children: [ "MongoDB", "dbm" ] } )
+db.categories.insert( { _id: "Languages", children: [] } )
+db.categories.insert( { _id: "Programming", children: [ "Databases", "Languages" ] } )
+db.categories.insert( { _id: "Books", children: [ "Programming" ] } )
+
+
+
+
+
+
+
+db.categories.find({ children: "MongoDB"});
+
+
+
+
+
+
+
+
+var descendants=[];
+var stack=[];
+var item=db.categories.findOne({_id: "Programming"});
+stack.push(item);
+while(stack.length>0){
+	var current=stack.pop();
+	var children=db.categories.find({_id: {$in: current.children}});
+	while(children.hasNext() === true){
+		var child=children.next();
+		print(tojson(child));
+		descendants.push(child._id);
+		if(child.children.length>0){
+			stack.push(child);
+		}
+	}
+}
+
+
+
+descendants // but always takes databases as first donno why even after changing order in insertion
+
+
+
+
+
+
+
+
+var parent=db.categories.findOne({children: "Databases"});
+var sibling=[];
+for(var i=0,len=parent.children.length;i<len;i++){
+    if(parent.children[i] != "Databases"){
+        sibling.push(parent.children[i]);
+    }
+}
+sibling[1]

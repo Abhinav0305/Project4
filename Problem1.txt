@@ -1,0 +1,101 @@
+doc = db.famouspeople.findOne({_id : ObjectId("51df07b094c6acd67e492f41")})
+doc._id=100
+db.famouspeople.insert(doc)
+db.famouspeople.remove({_id : ObjectId("51df07b094c6acd67e492f41")})
+
+
+db.famouspeople.insertOne({
+"_id": 20,
+"name": {
+    "first": "Mary",
+    "last": "Sally"
+},
+"birth": ISODate("1933-08-27T04:00:00Z"),
+"death": ISODate("1984-11-07T04:00:00Z"),
+"contribs": [
+    "C++",
+    "Simula"
+],
+"awards": [
+{
+    "award": "WPI Award",
+    "year": 1999,
+    "by": "WPI"
+}
+]
+})
+
+
+db.famouspeople.insertOne({
+"_id": 30,
+"name": {
+    "first": "Ming",
+    "last": "Zhang"
+},
+"birth": ISODate("1911-04-12T04:00:00Z"),
+"death": ISODate("2000-11-07T04:00:00Z"),
+"contribs": [
+    "C++",
+    "FP",
+	"Python"
+],
+"awards": [
+{
+    "award": "WPI Award",
+    "year": 1960,
+    "by": "WPI"
+},
+{
+	"award": "Turing Award",
+	"year": 1960,
+	"by": "ACM"
+}
+]
+})
+
+
+
+
+db.famouspeople.find(
+{ awards: {
+    $elemMatch: {
+        award: "Turing Award",
+        year: {$gt: 1960}
+    }
+}
+}
+)
+
+
+db.famouspeople.find({"awards.2" : {$exists : true}})
+
+
+db.famouspeople.update({_id: 6}, {$addToSet: {contribs: "Python"}})
+
+
+db.famouspeople.update({ _id: 20}, {$set : {comments: ["taught in 3 universities","was an amazing pioneer","lived in worcester"]}})
+
+
+
+db.famouspeople.find({"name.first" : "Mary", "name.last" : "Sally"},{contribs:1}).forEach(function (x){
+   x.contribs.forEach(function (y){
+        docs=db.famouspeople.find({"contribs":y});
+        print('{Contribution:" '+y+' ,');
+        docs.forEach(function(doc){
+           print('People: [{first: "'+doc.name.first+ '",last: "' + doc.name.last+'"}] '); 
+        });
+		print('}');
+   }) 
+});
+
+
+db.famouspeople.find({'name.first': {$regex: '^Jo.*'}}).sort({'name.last':1}) //if starting with Jo required
+db.famouspeople.find({"name.first": {$regex: '^Jo*'}}).sort({"name.last":1}) // Matches J or Jo even though i think it is wrong
+
+
+
+db.famouspeople.update({ _id: 30, "awards.by": "WPI"},{$set: {"awards.$.year": 1965}})
+
+
+doc=db.famouspeople.findOne({_id:3},{contribs:1})
+db.famouspeople.update({_id: 30},{$push: {contribs:doc.contribs}})
